@@ -5574,7 +5574,8 @@ a, area, button, [role="button"], input, label, select, summary, textarea {
 
 a[target]:not(.btn) {
   font-weight: 500;
-  text-decoration-skip-ink: auto;
+  -webkit-text-decoration-skip: ink;
+          text-decoration-skip-ink: auto;
   text-decoration: underline !important; }
 
 /* btn active */
