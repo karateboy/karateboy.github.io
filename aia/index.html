@@ -16,6 +16,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.24.0/axios.min.js"
         integrity="sha512-u9akINsQsAkG9xjc1cnGF4zw5TFDwkxuc9vUp5dltDWYCSmyd0meygbvgXrlc/z7/o4a19Fb5V0OUE58J7dcyw=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"
+        integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <title>全球斗數曆</title>
 </head>
 
@@ -29,41 +32,39 @@
         <b-card header="全球斗數曆" header-bg-variant="info" class="m-3 border">
             <b-form-group class="p-2" id="city-picker" label="城市:" label-for="city-picker" description="請輸入目標城市">
                 <b-form-select v-model="form.city" :options="cityList"></b-form-select>
+                {{ form.city }}
             </b-form-group>
-
             <b-form-group class="p-2" id="taiwan-datepicker" label="日期:" label-for="taiwan-datepicker"
-                description="請輸入日期">
-                <b-form-datepicker id="taiwan-datepicker" v-model="form.date" class="mb-2" size="lg" locale="zh-TW">
-                </b-form-datepicker>
+                description="請輸入日期"> {{ form.date }}
+                <b-form-datepicker id="taiwan-datepicker" v-model="form.date" class="mb-2" size="lg" locale="zh-TW" />
+
             </b-form-group>
             <b-form-group class="p-2" id="taiwan-timepicker" label="時間:" label-for="taiwan-datepicker"
-                description="請輸入時間">
-                <b-form-timepicker id="taiwan-timepicker" v-model="form.time" locale="zh-TW" size="lg">
-                </b-form-timepicker>
+                description="請輸入時間"> {{ form.time }}
+                <b-form-timepicker id="taiwan-timepicker" v-model="form.time" locale="zh-TW" size="lg" />
+
             </b-form-group>
             <b-row>
                 <b-col class="text-center">
-                    <b-button variant="primary" size="lg" @click="query">查詢</b-button>
+                    <b-button variant="primary" size="lg" @click="query">查詢 <b-spinner v-if="spinning" variant="primary"
+                            label="Spinning"></b-spinner>
+                    </b-button>
                     </b-button>
                 </b-col>
             </b-row>
         </b-card>
         <b-card header="查詢結果" header-bg-variant="info" class="m-3 border" v-if="show">
             <b-form-group class="p-2" id="city-picker" label="年柱:">
-                <b-form-input v-model="result.year">
-                    </b-form-select>
+                <b-form-input v-model="result.year" />
             </b-form-group>
             <b-form-group class="p-2" id="city-picker" label="月柱:">
-                <b-form-input v-model="result.month">
-                    </b-form-select>
+                <b-form-input v-model="result.month" />
             </b-form-group>
             <b-form-group class="p-2" id="city-picker" label="日柱:">
-                <b-form-input v-model="result.day">
-                    </b-form-select>
+                <b-form-input v-model="result.day" />
             </b-form-group>
             <b-form-group class="p-2" id="city-picker" label="時柱:">
-                <b-form-input v-model="result.time">
-                    </b-form-select>
+                <b-form-input v-model="result.time" />
             </b-form-group>
         </b-card>
     </div>
@@ -75,16 +76,19 @@
             return {
                 form: {
                     city: null,
-                    email: "",
+                    time: "",
                     name: "test",
                     checked: true
                 },
+                spinning: false,
                 cityList: [
                     { value: null, text: '請選擇一個城市' },
-                    { value: "121e290", text: '上海' },
-                    { value: "2e201", text: '巴黎' },
-                    { value: "12e496", text: '羅馬' },
-                    { value: "0w125", text: '倫敦' },
+                    { value: "121e33", text: '上海' },
+                    { value: "2e328", text: '巴黎' },
+                    { value: "12e570", text: '羅馬' },
+                    { value: "0w127", text: '倫敦' },
+                    { value: "144e565", text: '墨爾本' },
+                    { value: "74w006", text: '紐約' },
                 ],
                 show: false,
                 result: {
@@ -98,20 +102,24 @@
         computed: {},
         methods: {
             async query() {
+                this.spinning = true;
                 this.show = false;
+                let dateParts = this.form.date.split("-");
+                let timeParts = this.form.time.split(":");
                 let params = {
                     query_longitude: this.form.city,
-                    year: 2021,
-                    month: 8,
-                    day: 20,
-                    hour: 12,
-                    minute: 0,
-                    second: 0
+                    year: parseInt(dateParts[0]),
+                    month: parseInt(dateParts[1]),
+                    day: parseInt(dateParts[2]),
+                    hour: parseInt(timeParts[0]),
+                    minute: parseInt(timeParts[1]),
+                    second: parseInt(timeParts[2])
                 };
-
+                console.log(params);
                 try {
                     const resp = await axios.get("http://45.79.103.226:8080/lcal/", { params });
                     this.show = true;
+                    this.spinning = false;
                     if (resp.status === 200) {
                         const ret = resp.data;
                         console.log(ret);
